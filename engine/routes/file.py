@@ -1,20 +1,22 @@
 from fastapi import APIRouter
+from logging import getLogger
 
 
-file_router = APIRouter(tags=["nodes", "updates"])
+node_router = APIRouter(tags=["nodes", "updates"])
+node_logger = getLogger(__name__)
 
 
-@file_router.get("/nodes/{id}")
+@node_router.get("/nodes/{id}")
 async def get_nodes():
     pass
 
 
-@file_router.get("/node/{id}/history")
-async def get_node_hostory():
+@node_router.get("/node/{id}/history")
+async def get_node_history():
     pass
 
 
-@file_router.get("/delete/{id}")
+@node_router.get("/delete/{id}")
 async def delete_node():
     pass
 
