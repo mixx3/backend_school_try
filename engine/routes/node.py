@@ -8,17 +8,14 @@ from fastapi_sqlalchemy import db
 import json
 
 
-node_router = APIRouter(tags=["nodes", "updates"])
+node_router = APIRouter(tags=["nodes"])
 logger = getLogger(__name__)
 
 
 @node_router.get("/nodes/{id}")
 async def get_nodes(id: str = Path()):
     logger.debug(f"Getting node with id: {id}")
-    db_res = await get_node_by_id(id, db.session)
-    res = []
-    for node in db_res:
-        res.append(json.dumps(node, cls=AlchemyEncoder))
+    res = await get_node_by_id(id, db.session)
     return JSONResponse(status_code=200, content=res)
 
 
@@ -30,13 +27,19 @@ async def get_node_history(id: str = Path(title='id элемента для ко
     db_res = await get_nodes_by_date(db.session, start_date=dateStart, end_date=dateEnd, id=id)
     res = []
     for node in db_res:
-        res.append(json.dumps(node, cls=AlchemyEncoder))
+        n = node.to_dict()
+        n['date'] = str(n['date'])
+        res.append(n)
     return JSONResponse(status_code=200, content=res)
 
 
-@node_router.get("/delete/{id}")
-async def delete_node(id: str):
+@node_router.delete("/delete/{id}")
+async def delete_node(id: str,
+                      date: str | None = Query(default=None)
+                      ):
     logger.debug(f"Deleting node with id: {id}")
+    if date:
+        logger.debug(f"Delete date: {date}")
     await delete_node_by_id(id, db.session)
     return JSONResponse(status_code=200,
                         content={'description': 'Удаление прошло успешно.'}

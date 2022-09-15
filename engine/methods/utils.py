@@ -1,4 +1,5 @@
 import json
+from typing import Dict, Any, List
 
 from engine.settings import get_settings
 from engine.routes.models import SystemChunk, SystemItem
@@ -20,27 +21,40 @@ async def add_system_item(item: SystemChunk, session: Session) -> None:
 
 
 async def get_children_by_id(id: str, session: Session) -> list[FileInfo]:
-    return session.query(FileInfo).filter(FileInfo.parentId == id).all()
+    res = session.query(FileInfo).filter(FileInfo.parentId == id).all()
+    session.flush()
+    return res
 
 
-async def get_node_by_id(id: str, session: Session) -> SystemItem:
-    node: FileInfo = session.query(FileInfo).filter(FileInfo.id == id).one_or_none()
-    if not node:
+async def get_node_by_id(id: str, session: Session) -> dict[Any, list[SystemChunk] | Any]:
+    nodes: list[FileInfo] = session.query(FileInfo).filter(FileInfo.id == id).all()
+    session.flush()
+    if not nodes:
         raise NodeNotFound(id)
     children = []
+    node = nodes[0]
+    n = node.to_dict()
+    n['date'] = str(n['date'])
     for child in await get_children_by_id(id, session):
-        children.append(SystemChunk(**dict(json.dumps(child, cls=AlchemyEncoder))))
-    return SystemItem(**dict(json.dumps(node, cls=AlchemyEncoder)), children=children)
+        c = child.to_dict()
+        c['date'] = str(c['date'])
+        children.append(c)
+    return dict(**n, children=children)
 
 
 async def delete_node_by_id(id: str, session: Session) -> None:
-    node: SystemChunk = session.query(FileInfo).filter(FileInfo.id == id).one_or_none()
-    if not node:
+    nodes: list[FileInfo] = session.query(FileInfo).filter(FileInfo.id == id).all()
+    session.flush()
+    if not nodes:
         raise NodeNotFound(id)
     children = await get_children_by_id(id, session)
-    session.delete(node)
-    for child in children:
-        session.delete(child)
+    for node in nodes:
+        session.delete(node)
+    session.flush()
+    if children:
+        for child in children:
+            session.delete(child)
+            session.flush()
 
 
 async def get_nodes_by_date(session: Session,
@@ -59,4 +73,5 @@ async def get_nodes_by_date(session: Session,
                                                  FileInfo.date <= end_date).all()
         if not res:
             raise NodeNotFound(id)
+    session.flush()
     return res

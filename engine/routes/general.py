@@ -20,8 +20,7 @@ async def create_nodes(batch: ImportBatch):
     for item in items:
         item.date = upd_time
         await add_system_item(item, db.session)
-    res = json.dumps({'description': 'Вставка или обновление прошли успешно.'}, ensure_ascii=True)
-    return JSONResponse(res, status_code=200, )
+    return JSONResponse(content={'description': 'Вставка или обновление прошли успешно.'}, status_code=200)
 
 
 @general_router.get("/updates")
@@ -32,5 +31,7 @@ async def get_updates(date: datetime):
     nodes = await get_nodes_by_date(db.session, start_date=start_date, end_date=date)
     res = []
     for node in nodes:
-        res.append(json.dumps(node, cls=AlchemyEncoder))
+        n = node.to_dict()
+        n['date'] = str(n['date'])
+        res.append(n)
     return JSONResponse(res, status_code=200)
