@@ -11,12 +11,13 @@ class Type(str, enum.Enum):
 
 
 class FileInfo(Base):
-    id = Column(sqlalchemy.String, nullable=False, primary_key=True)
+    file_id = Column(sqlalchemy.Integer, nullable=False, primary_key=True)
+    id = Column(sqlalchemy.String, nullable=False)
     date = Column(sqlalchemy.DateTime, nullable=False)
-    parentId = Column(sqlalchemy.String, nullable=True)
     type = Column(sqlalchemy.String, nullable=False)
+    parentId = Column(sqlalchemy.String, nullable=True)
     url = Column(sqlalchemy.String, nullable=True)
     size = Column(sqlalchemy.Integer, nullable=True)
 
     def __repr__(self):
-        return f"FileInfo(id: {id}, date: {date}"
+        return f"FileInfo(id: {self.id}, date: {self.date}"

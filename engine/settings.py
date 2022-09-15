@@ -6,10 +6,6 @@ class Settings(BaseSettings):
     """Application settings"""
 
     DB_DSN: PostgresDsn
-    CORS_ALLOW_ORIGINS: list[str] = ['*']
-    CORS_ALLOW_CREDENTIALS: bool = True
-    CORS_ALLOW_METHODS: list[str] = ['*']
-    CORS_ALLOW_HEADERS: list[str] = ['*']
 
     class Config:
         """Pydantic BaseSettings config"""
