@@ -6,6 +6,7 @@ from fastapi_sqlalchemy import DBSessionMiddleware
 from engine.exceptions import NodeNotFound
 from fastapi.responses import JSONResponse
 from logging import getLogger
+from pydantic import ValidationError
 import starlette
 
 
@@ -36,6 +37,13 @@ async def http_value_error_handler(request: starlette.requests.Request, exc: Val
     logger.info(f"Failed to parse data, request: {request.path_params}, exc: {exc}")
     return JSONResponse(content={"description":	"Элемент не найден"},
                         status_code=400)
+
+
+@app.exception_handler(ValidationError)
+async def http_validation_error(request: starlette.requests.Request, exc: ValidationError):
+    logger.info(f"{exc} {request.path_params}")
+    return JSONResponse(content={'description': 'invalid schema'},
+                        status_code=422)
 
 
 @app.exception_handler(Exception)

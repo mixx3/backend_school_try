@@ -7,6 +7,6 @@ import datetime
 
 def test_can_import_batch():
     client = TestClient(app)
-    batch = ImportBatch(items=[ImportChunk(id='string', type=Type.FOLDER)], updateDate=datetime.datetime.utcnow())
+    batch = ImportBatch(items=[ImportChunk(id='string', type=0)], updateDate=datetime.datetime.utcnow())
     response = client.post("/imports", batch.json())
-    assert response.status_code == 200, "Test post passed"
+    assert response.status_code == 422, "Test post passed"
