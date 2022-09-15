@@ -65,12 +65,14 @@ async def find_children(node: dict, id: str, session: Session) -> None:
         children_ids = set()
         for c in children_with_history:
             children_ids.add(c.to_dict()['id'])
-        children = []
         for i in children_ids:
-            child = children.append(find_latest_node(session.query(FileInfo).filter(FileInfo.id == i).all()))
+            child = await find_latest_node(session.query(FileInfo).filter(FileInfo.id == i).all())
             if child:
+                split_date = str(child['date']).split()
+                child['date'] = f"{split_date[0]}T{split_date[1]}Z"
+                node['children'].append(child)
+                node['size'] += child.get('size', 0)
                 await find_children(child, child['id'], session)
-        node['children'] = children
     else:
         node['children'] = None
 
@@ -83,7 +85,8 @@ async def get_node_by_id(id: str, session: Session) -> dict[Any, list[SystemChun
         logger.info(f"Node with id {id} not found in db")
         raise NodeNotFound(id)
     node = await find_latest_node(nodes)
-    node['date'] = str(node['date'])
+    split_date = str(child['date']).split()
+    node['date'] = f"{split_date[0]}T{split_date[1]}Z"
     await find_children(node, id, session)
     return node
 
