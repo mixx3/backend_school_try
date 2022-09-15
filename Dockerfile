@@ -6,6 +6,7 @@ RUN pip install --no-cache-dir -r /app/requirements.txt
 
 
 ADD gunicorn_conf.py alembic.ini /app/
+ADD .env /app/.env
 ADD migrations /app/migrations
 ADD engine /app/engine
 
