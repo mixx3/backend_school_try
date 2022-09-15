@@ -13,7 +13,7 @@ logger = getLogger(__name__)
 
 
 @node_router.get("/nodes/{id}")
-async def get_nodes(id: str = Path()):
+async def get_node(id: str = Path()):
     logger.debug(f"Getting node with id: {id}")
     res = await get_node_by_id(id, db.session)
     return JSONResponse(status_code=200, content=res)

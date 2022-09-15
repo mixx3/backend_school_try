@@ -60,7 +60,7 @@ class SystemItem(BaseModel):
     parentId: str | None
     url: str | None
     size: int | None
-    children: list[SystemChunk]
+    children: list[SystemChunk] | None
 
 
 class Error(BaseModel):
